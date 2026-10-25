@@ -1324,7 +1324,7 @@ testallnetworks_nooptim = function(filename, csvfile)
 
     end
 
-    @save "RAW_"*filename*".jld2" allfs
+    @save filename*".jld2" allfs
     df2 = DataFrame(logWs = allfs)
     masterdf = hcat(df, df2)
     
