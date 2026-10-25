@@ -1274,7 +1274,7 @@ testallnetworks_nooptim = function(filename, csvfile)
             end
         elseif df.network_type[row] == "ssm_min"
             hybridvect = zeros(6)
-            hybridvect[size] = 1
+            hybridvect[1] = size
             #Threads.@threads for i in 1:nreplicates
             for i in 1:nreplicates
                 allfs[row][i] = log(anyssmnet_analytic_sim_nodemandgermm(hybridvect; r = exp(df.optr[row]), m = m, deltaO1 = deltaO, mutmag = mutmag, root = root)) + FLOOR
