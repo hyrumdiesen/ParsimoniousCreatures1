@@ -1,6 +1,6 @@
 #plotting base selected environments
 include("bones_ode.jl")
-df = DataFrame(CSV.File("results/selectedEdata/selectedEdata_combined.csv"))
+df = DataFrame(CSV.File("results/selectedEdata/processed/selectedEdata_combined.csv"))
 
 plotselectedE = function(df, E, delta, ylimW)
 
@@ -95,26 +95,26 @@ plotcolumn = function(df, delta, ylimWs)
     return ps, fig
 end
 
-p_base = plotcolumn(df, "baseline", [70, 400, 10000])[2]
+p_base = plotcolumn(df, "baseline", [80, 400, 11500])[2]
 savefig(p_base, "results/plots/selectedE_baseline.pdf")
 
-ps = plotcolumn(df, "Nstar", [70, 400, 10000])[2]
+ps = plotcolumn(df, "Nstar", [80, 400, 11500])[2]
 savefig(ps, "results/plots/selectedE_Nstar.pdf")
 
-ps = plotcolumn(df, "mutmag", [250, 4000, 10000])[2]
+ps = plotcolumn(df, "mutmag", [250, 4000, 11500])[2]
 savefig(ps, "results/plots/selectedE_mutmag.pdf")
 
 #now plot supplemental selected E
 #first node mutation
 
-ps = plotcolumn(df, "nodem_adjusted", [70, 400, 10000])[2]
+ps = plotcolumn(df, "nodem_adjusted", [80, 400, 11500])[2]
 savefig(ps, "results/plots/selectedE_nodem.pdf")
 
 #now germline mutation
 
-p1 = plotcolumn(df, "germm0p001", [70, 400, 10000])[2]
-p2 = plotcolumn(df, "germm0p01", [70, 400, 10000])[2]
-p3 = plotcolumn(df, "germm0p1", [70, 400, 10000])[2]
+p1 = plotcolumn(df, "germm0p001", [80, 400, 11500])[2]
+p2 = plotcolumn(df, "germm0p01", [80, 400, 11500])[2]
+p3 = plotcolumn(df, "germm0p1", [80, 400, 11500])[2]
 
 my_layout = @layout [
     a  b  c d;   # Row 1
@@ -122,3 +122,14 @@ my_layout = @layout [
 p_combined = Plots.plot(p_base, p1, p2, p3, layout = my_layout, size = (2400,1200), xlabel = "Network size (number of mutating parameters)", labelfontsize = 10, ylabel = "Expected Fitness", margin = 10mm, leftmargin = 12mm)
 
 savefig(p_combined, "results/plots/selectedE_germlinem.pdf")
+
+
+#now NhitNstar data for supplemental figure:
+
+df_NhitNstar = DataFrame(CSV.File("results/selectedEdata/processed/NhitNstar12and25.csv"))
+
+p = plotcolumn(df_NhitNstar, "baseline", [80, 400, 11500])[2]
+savefig(p, "results/plots/selectedE_NhitNstar_Nstar12.pdf")
+
+p = plotcolumn(df_NhitNstar, "Nstar", [80, 400, 11500])[2]
+savefig(p, "results/plots/selectedE_NhitNstar_Nstar25.pdf")
