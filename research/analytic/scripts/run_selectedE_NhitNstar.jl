@@ -23,4 +23,4 @@ NhitNstartoggle = 1
 
 testdf = CSV.read("data/Nstar12and25_baseline.csv", DataFrame)
 
-testdf2 = testallnetworks_nooptim("NhitNstar12and25_poo", testdf[1:2,:])
+testdf2 = testallnetworks_nooptim("NhitNstar12and25", testdf)
