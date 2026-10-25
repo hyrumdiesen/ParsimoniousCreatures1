@@ -13,7 +13,7 @@ CMD ["julia", "--project=/research", "scripts/run_simulations.jl"]
 
 FROM base AS analytic
 COPY analytic/ /research/
-RUN julia --project=/research/analytic -e 'using Pkg; Pkg.instantiate()'
+RUN julia --project=/research -e 'using Pkg; Pkg.instantiate()'
 CMD ["julia", "--project=/research", "scripts/run_selectedE_NhitNstar.jl"]
 
 # Copy environment definitions first
