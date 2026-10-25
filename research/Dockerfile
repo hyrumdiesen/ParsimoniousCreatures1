@@ -3,6 +3,8 @@ FROM julia:1.12.6 AS base
 #instances separate?
 WORKDIR /research
 
+ENV JULIA_NUM_THREADS=auto
+
 FROM base AS ode
 COPY ode/ /research/
 
