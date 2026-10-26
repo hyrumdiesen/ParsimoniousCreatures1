@@ -77,5 +77,3 @@ If you use this code or build on these analyses, please cite the associated manu
 _Parsimonious Creatures: Building Gene Regulatory Networks Robust to Somatic Evolution._
 
 Raw data to generate heatmaps are available through Zenodo (https://doi.org/10.5281/zenodo.23656540)
-```
->>>>>>> ff45d7c (fixing paths)
