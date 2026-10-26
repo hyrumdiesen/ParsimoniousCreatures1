@@ -1,4 +1,4 @@
-include("bones_ode.jl")
+include(joinpath(pwd(), "scripts/bones_ode.jl"))
 
 #running a deterministic model of parsimonious creatures without mutation. Then optimizing to naiively discover the 
 #feedforward motif and the simple step motif.

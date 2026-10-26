@@ -14,7 +14,9 @@ using HDF5
 using DataFrames
 using CSV
 using Dates
-using GLMakie, GraphMakie, Graphs   # GLMakie → interactive; swap for CairoMakie for static/PDF output
+#using GLMakie # GLMakie → interactive; swap for CairoMakie for static/PDF output
+using GraphMakie
+using Graphs   
 using LaTeXStrings
 
 using CairoMakie          # variable edge widths render here; GLMakie collapses them
