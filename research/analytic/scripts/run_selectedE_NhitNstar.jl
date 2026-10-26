@@ -21,6 +21,6 @@ anyssmnet_analytic_sim_nodemandgermm([1,0,0,0,0,0])
 
 NhitNstartoggle = 1
 
-testdf = CSV.read("data/Nstar12and25_baseline.csv", DataFrame)
+testdf = CSV.read("input_data/Nstar12and25_baseline.csv", DataFrame)
 
-testdf2 = testallnetworks_nooptim("NhitNstar12and25", testdf)
+testdf2 = testallnetworks_nooptim("output_data/NhitNstar12and25", testdf)

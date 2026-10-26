@@ -1,28 +1,21 @@
 FROM julia:1.12.6 AS base
-#keep this docker file in the /research directory, I think it will keep different julia
-#instances separate?
-WORKDIR /research
 
 ENV JULIA_NUM_THREADS=auto
 
-FROM base AS ode
-COPY ode/ /research/
+RUN apt-get update && \
+    apt-get install -y ghostscript && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN julia --project=/research -e 'using Pkg; Pkg.instantiate()'
-CMD ["julia", "--project=/research", "scripts/run_simulations.jl"]
+FROM base AS ode
+
+WORKDIR /research/ode
+COPY ode/ /research/ode/
+
+RUN julia --project=/research/ode -e 'using Pkg; Pkg.instantiate()'
 
 FROM base AS analytic
-COPY analytic/ /research/
-RUN julia --project=/research -e 'using Pkg; Pkg.instantiate()'
-CMD ["julia", "--project=/research", "scripts/run_selectedE_NhitNstar.jl"]
 
-# Copy environment definitions first
-#COPY Project.toml Manifest.toml* ./
-#RUN julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+WORKDIR /research/analytic
+COPY analytic/ /research/analytic/
 
-# Copy all your local .jl scripts into the container
-#COPY . .
-
-# Execute the simulation runner when the container starts
-#CMD ["julia", "--project=.", "run_selectedE.jl"]
-
+RUN julia --project=/research/analytic -e 'using Pkg; Pkg.instantiate()'
