@@ -2,7 +2,7 @@ include(joinpath(pwd(), "scripts/bones_ode.jl"))
 
 path1 = joinpath(pwd(), "output_figures/plots")
 #plot simplex legend
-p = plot_simplex_legend(; labels=("FF var2","SSM Avg","SSM Min"))
+p = plot_simplex_legend(; labels=("FFM (var 2)","SSM Avg","SSM Min"))
 savefig(p, "output_figures/plots/heatmap_legend.pdf")
 
 #format is [1,2,3] from small to large network cutoff for the first dimention of the tensor

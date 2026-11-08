@@ -40,7 +40,7 @@ Nvst_save("datasets/Nvstdata/PCsimtraces_ssm.h5", PCsimtraces_ssm;
 NUM_GENOTYPES = 25
 m = 0.0005
 KCmatrix,rs,phis = separatecircuits7(4)
-PCsimtraces_min_ssm = Nvst_data(KCmatrix, rs, phis; num_sims = 200, MAX_TIME = 3000, time_bin = 1)
+PCsimtraces_min_ssm = Nvst_data(KCmatrix, rs, phis; num_sims = 200, MAX_TIME = 3000, time_bin = 1, NUM_GENOTYPES = NUM_GENOTYPES)
 Nvst_save("datasets/Nvstdata/PCsimtraces_min_ssm.h5", PCsimtraces_min_ssm;
     params = (; KCmatrix, rs, phis, m, mutmag,
                 num_sims = 200, MAX_TIME = 5000, NUM_GENOTYPES = NUM_GENOTYPES),
@@ -49,12 +49,12 @@ Nvst_save("datasets/Nvstdata/PCsimtraces_min_ssm.h5", PCsimtraces_min_ssm;
 #in order to make ssm averaging redundancy competitive in this environment at the same timescales for visualization purposes,
 #we are going to test an absurdly huge averaging network of over 500 parameters. This will take a few minutes.
 KCmatrix,rs,phis = checkerboard7(16)
-PCsimtraces_avg_ssm_real = Nvst_data(KCmatrix, rs, phis; num_sims = 200, MAX_TIME = 3000, time_bin = 1)
-p = Nvst_hot_trajectories(PCsimtraces_avg_ssm_real; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nfeedforward motif, no mutation")
+PCsimtraces_avg_ssm_real = Nvst_data(KCmatrix, rs, phis; num_sims = 200, MAX_TIME = 3000, time_bin = 1, NUM_GENOTYPES = NUM_GENOTYPES)
+#p = Nvst_hot_trajectories(PCsimtraces_avg_ssm_real; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nfeedforward motif, no mutation")
 
 Nvst_save("datasets/Nvstdata/PCsimtraces_avg_ssm_real.h5", PCsimtraces_avg_ssm_real;
     params = (; KCmatrix, rs, phis, m, mutmag,
-                num_sims = 200, MAX_TIME = 5000, NUM_GENOTYPES = NUM_GENOTYPES),
+                num_sims = 200, MAX_TIME = 3000, NUM_GENOTYPES = NUM_GENOTYPES),
     figure = "PCsimtraces_avg_ssm_real")
 
 

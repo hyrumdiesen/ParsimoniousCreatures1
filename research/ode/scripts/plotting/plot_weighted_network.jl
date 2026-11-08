@@ -8,7 +8,8 @@ save("output_figures/topology_diagrams/topo_ffmotif.pdf", p)
 p =plot_weighted_network_makie(transpose(KCmatrix), rs, phis; figwidth = 400, rowwidth = 0.4, edgecurve = 0.1, curves = false, interior_node_labeling = true)
 save("output_figures/topology_diagrams/topo_ffmotif_labeled.pdf", p)
 #sample mutant replication functions
-p = plotmanymutants_withTFs(KCmatrix,rs,phis, 1.0, 20)
+Random.seed!(11)
+p = plotmanymutants_withTFs(KCmatrix,rs,phis, 2.0, 10; withmutationshown = "with mutation I")
 savefig(p, "output_figures/plots/repfunc_ffmotif.pdf")
 
 #averaging redundancy feedforward motif var 1
@@ -31,8 +32,14 @@ p = plot_weighted_network_makie(KCmatrix, rs, phis; figwidth = 400, rowwidth = 0
 save("output_figures/topology_diagrams/topo_ssmotif_labeled.pdf", p)
 
 #sample mutant replication functions
-p = plotmanymutants_withTFs(KCmatrix,rs,phis, 1.0, 40)
+Random.seed!(18)
+p = plotmanymutants_withTFs(KCmatrix,rs,phis, 1.0, 30; withmutationshown = "with mutation II")
 savefig(p, "output_figures/plots/repfunc_ssmotif.pdf")
+
+KCmatrix = [0 0 0; 1 0 0; 0 1 0]
+rs = [1, 0, 0]
+phis = [0,0,0]
+p = plot_weighted_network_makie(transpose(KCmatrix), rs, phis; figwidth = 400, rowwidth = 0.4, edgecurve = 0.0)
 
 
 #averaging redundancy simple step motif
@@ -41,7 +48,8 @@ p = plot_weighted_network_makie(KCmatrix, rs, phis; figwidth = 400, rowwidth = 0
 save("output_figures/topology_diagrams/topo_ssmavgred.pdf", p)
 
 #sample mutant replication functions
-p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30)
+Random.seed!(3)
+p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30; NUM_GENOTYPES = 50, size = (300,200), legfontsize = 7)
 savefig(p, "output_figures/plots/repfunc_ssmavgred.pdf")
 
 
@@ -50,7 +58,8 @@ KCmatrix,rs,phis = separatecircuits7(3)
 p = plot_weighted_network_makie(KCmatrix, rs, phis; figwidth = 400, rowwidth = 0.4, edgecurve = 0.1)
 save("output_figures/topology_diagrams/topo_ssmminred_3.pdf", p)
 
-p = plotmanymutants(KCmatrix,rs,phis, 4.0, 30)
+Random.seed!(26)
+p = plotmanymutants(KCmatrix,rs,phis, 4.0, 30, size = (300,200), legfontsize = 7)
 
 savefig(p, "output_figures/plots/repfunc_ssmminred.pdf")
 
@@ -58,11 +67,13 @@ savefig(p, "output_figures/plots/repfunc_ssmminred.pdf")
 #compare averaging redundancy real and approximated
 #sample mutant replication functions
 KCmatrix,rs,phis = checkerboard7(3)
-p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30, NUM_GENOTYPES = 25)
+Random.seed!(1)
+p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30, NUM_GENOTYPES = 25, size = (300,200), legfontsize = 5)
 savefig(p, "output_figures/plots/repfunc_ssmavgred_real.pdf")
 
 KCmatrix,rs,phis = separatecircuits7(1)
-p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30; mutmag = mutmag/7, NUM_GENOTYPES = 25)
+Random.seed!(1)
+p = plotmanymutants(KCmatrix,rs,phis, 2.0, 30; mutmag = mutmag/7, NUM_GENOTYPES = 25, size = (300,200), legfontsize = 5)
 savefig(p, "output_figures/plots/repfunc_ssmavgred_fake.pdf")
 
 ####plot bureaucratic paranoia min redundancy topologies

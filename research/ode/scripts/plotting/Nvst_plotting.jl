@@ -18,46 +18,69 @@ PCsimtraces_min_ssm_20 = Nvst_load("datasets/Nvstdata/PCsimtraces_min_ssm_20.h5"
 
 #figure 1 simulations of parsimonious creatures
 NUM_GENOTYPES = 50
+xlim = 1300
+positions = LinRange(100, 1200, 5)
+
 #feedforward motif simulation traces with and without mutation
-p = Nvst_hot_trajectories(PCsimtraces_ffm_m0; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nfeedforward motif, no mutation")
+p = Nvst_figure(PCsimtraces_ffm_m0; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_ffm_m0.pdf")
-p = Nvst_hot_trajectories(PCsimtraces_ffm; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nfeedforward motif, yes mutation")
+
+p = Nvst_figure(PCsimtraces_ffm; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_ffm.pdf")
 #simple step motif simulation traces with and without mutation
-p = Nvst_hot_trajectories(PCsimtraces_ssm_m0; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nsimple step motif, no mutation")
+
+p = Nvst_figure(PCsimtraces_ssm_m0; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_ssm_m0.pdf")
-p = Nvst_hot_trajectories(PCsimtraces_ssm; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nsimple step motif, yes mutation")
+
+p = Nvst_figure(PCsimtraces_ssm; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_ssm.pdf")
 
 #figure 2 simulations of parsimonious creatures
 NUM_GENOTYPES = 25
 
 #ssm min redundancy
-p = Nvst_hot_trajectories(PCsimtraces_min_ssm; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nSSM min redundancy")
+p = Nvst_figure(PCsimtraces_min_ssm; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_min_ssm.pdf")
+
 #ssm averaging redundancy
-p = Nvst_hot_trajectories(PCsimtraces_avg_ssm_real; xlim = (0, 1300), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nSSM averaging redundancy")
+p = Nvst_figure(PCsimtraces_avg_ssm_real; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_avg_ssm_real.pdf")
 
 
 
 #bureaucratic paranoia figure simulations of parsimonious creatures
-p1 = Nvst_hot_trajectories(PCsimtraces_min_ssm_1; linewidthbottomplot = 3, xlim = (0, 1000), time_bin = 10, log_scale = true, colorbar = false, title = "")
-p2 = Nvst_hot_trajectories(PCsimtraces_min_ssm_5; linewidthbottomplot = 3, xlim = (0, 1000), time_bin = 10, log_scale = true, colorbar = false, title = "")
-p3 = Nvst_hot_trajectories(PCsimtraces_min_ssm_10; linewidthbottomplot = 3, xlim = (0, 1000), time_bin = 10, log_scale = true, colorbar = false, title = "")
-p4 = Nvst_hot_trajectories(PCsimtraces_min_ssm_20; linewidthbottomplot = 3, xlim = (0, 1000), time_bin = 10, log_scale = true, colorbar = false, title = "")
+NUM_GENOTYPES = 25
+xlim = 1000
+positions = LinRange(100,900,5)
+
+p1 = Nvst_figure(PCsimtraces_min_ssm_1; positions = positions, xlim = (0,xlim))
+p2 = Nvst_figure(PCsimtraces_min_ssm_5; positions = positions, xlim = (0,xlim))
+p3 = Nvst_figure(PCsimtraces_min_ssm_10; positions = positions, xlim = (0,xlim))
+p4 = Nvst_figure(PCsimtraces_min_ssm_20; positions = positions, xlim = (0,xlim))
+
+savefig(p1, "output_figures/plots/PCsimtraces_bureaucraticparanoia1.pdf")
+savefig(p2, "output_figures/plots/PCsimtraces_bureaucraticparanoia2.pdf")
+savefig(p3, "output_figures/plots/PCsimtraces_bureaucraticparanoia3.pdf")
+savefig(p4, "output_figures/plots/PCsimtraces_bureaucraticparanoia4.pdf")
+
 
 #now combine them together
-p5 = Plots.plot(p1, p2, p3, p4, layout = (1,4), size = (1700,500), margin = 1mm, bottom_margin = 10mm, extra_plot_kwargs = Any[:tight_layout => true])
+#p5 = Plots.plot(p1, p2, p3, p4, layout = (1,4), size = (1700,500), margin = 1mm, bottom_margin = 3mm, extra_plot_kwargs = Any[:tight_layout => true])
 
-p5 = Plots.plot!(p5, left_margin = 12mm, subplot = 1)
-savefig(p5, "output_figures/plots/PCsimtraces_bureaucraticparanoia.pdf")
+#p5 = Plots.plot!(p5, subplot = 1)
+#savefig(p5, "output_figures/plots/PCsimtraces_bureaucraticparanoia.pdf")
 
 
 #supplemental figure averaging redundancy approximation
 
-p = Nvst_hot_trajectories(PCsimtraces_avg_ssm_real_3; xlim = (0, 600), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nSSM averaging redundancy, real")
+NUM_GENOTYPES = 25
+xlim = 600
+positions = LinRange(50,550,5)
+
+p = Nvst_figure(PCsimtraces_avg_ssm_real_3; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_avg_ssm_real_3.pdf")
 
-p = Nvst_hot_trajectories(PCsimtraces_avg_ssm_fake_3; xlim = (0, 600), time_bin = 10, log_scale = true, colorbar = false, title = "Simulations of Parsimonious Creatures:\nSSM averaging redundancy, approximated")
+p = Nvst_figure(PCsimtraces_avg_ssm_fake_3; positions = positions, xlim = (0,xlim))
 savefig(p, "output_figures/plots/PCsimtraces_avg_ssm_fake_3.pdf")
+
+

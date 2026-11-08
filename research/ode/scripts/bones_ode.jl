@@ -18,6 +18,8 @@ using Dates
 using GraphMakie
 using Graphs   
 using LaTeXStrings
+using KernelDensity
+using StatsPlots
 
 using CairoMakie          # variable edge widths render here; GLMakie collapses them
 CairoMakie.activate!() 
@@ -439,7 +441,7 @@ end
 
 # ---- Data -------------------------------------------------------------------
 Nvst_data = function(KCmatrix, rs, phis;
-                     num_sims = 100, MAX_TIME = 1000, NUM_GENOTYPES = 50,
+                     num_sims = 100, MAX_TIME = 1000, NUM_GENOTYPES = NUM_GENOTYPES,
                      time_bin = 10, log_floor = -3.0)
  
     max_time = trunc(Int, MAX_TIME)
@@ -489,9 +491,9 @@ bin_mean(x, b) = [mean(@view x[i:min(i + b - 1, end)]) for i in 1:b:length(x)]
 # means a segment only looks hot if BOTH ends are in a crowded region, so a line
 # leaving (or entering) a hot zone no longer gets a hot connecting segment.
 Nvst_hot_trajectories = function(data;
-                                 time_bin    = data.time_bin,  # 1 = no binning
-                                 bandwidth   = 0.75,           # "nearby" in cell-count units
-                                 log_scale   = false,           # log10 of the local count
+                                 time_bin    = 10,  # 1 = no binning
+                                 bandwidth   = 0.3,           # "nearby" in cell-count units
+                                 log_scale   = true,           # log10 of the local count
                                  segment_agg = min,            # min | (a, b) -> (a + b) / 2 | max
                                  nlevels     = 64,             # number of discrete colors
                                  linewidth   = 1.0,
@@ -500,8 +502,8 @@ Nvst_hot_trajectories = function(data;
                                  bg          = :black,
                                  xlim        = (0, 5000),
                                  ylim        = (0, NUM_GENOTYPES+2),
-                                 linewidthbottomplot = 3,
-                                 title       = :none)
+                                 jitter = 0.004,
+                                 title       = "")
 
     results = data.results
     n = length(results)
@@ -523,18 +525,21 @@ Nvst_hot_trajectories = function(data;
     # ---- One value per segment, then map to a color level -------------------
     S  = segment_agg.(D[1:end-1, :], D[2:end, :])               # (nb-1) x sims
     hi = max(maximum(D), 1e-6)
-    lo = -0.05 * hi                                             # keeps coolest lines visible
+    lo = -0.35 * hi                                             # keeps coolest lines visible
     lvl = clamp.(round.(Int, 1 .+ (S .- lo) ./ (hi - lo) .* (nlevels - 1)), 1, nlevels)
 
+    #cg = Plots.cgrad(:greys)
     cg = Plots.cgrad(:viridis)
     p = Plots.plot(;
         background_color_inside = bg,
         xlim = xlim, ylim = ylim,
-        xlabel = "Time", ylabel = "Total cells",
+        xlabel = "Time", ylabel = "Trajectories of N",
         legend = false,
         colorbar = colorbar,
+        #framestyle = :box,
         colorbar_title = log_scale ? "log10(nearby trajectories)" : "Nearby trajectories",
-        title = title, titlefontsize = 7,
+        title = title, titlefontsize = 8,
+        top_margin = 0Plots.mm,
         extra_plot_kwargs = Any[:tight_layout => true],
     )
 
@@ -547,6 +552,13 @@ Nvst_hot_trajectories = function(data;
             push!(ys, Y[k, i], Y[k+1, i], NaN)
         end
         isempty(xs) && continue
+
+        #loop to add jitter for trajectories at the absorbing max N state for better visualization
+        for i in 1:length(ys)
+            if ys[i] > NUM_GENOTYPES
+                ys[i] -= rand(Poisson(jitter*NUM_GENOTYPES))
+            end
+        end
         Plots.plot!(p, xs, ys;
                     color = cg[(l - 1) / (nlevels - 1)],
                     linewidth = linewidth, alpha = alpha, label = "")
@@ -559,20 +571,72 @@ Nvst_hot_trajectories = function(data;
                        markersize = 0, markerstrokewidth = 0, label = "")
     end
 
-    p2 = Plots.plot(data.time_axis, data.dtmeanvst;
-        linewidth = linewidthbottomplot, label = "Mean", legend = false, color = :black,
-        ylim = (0, 1.0), xlim = xlim, ylabel = "Reproductive rate", xlabel = "Time", framestyle = :box, extra_plot_kwargs = Any[:tight_layout => true])
+    #p2 = Plots.plot(data.time_axis, data.dtmeanvst;
+    #    linewidth = linewidthbottomplot, label = "Mean", legend = false, color = :black,
+    #    ylim = (0, 1.0), xlim = xlim, ylabel = "Reproductive rate", xlabel = "Time", framestyle = :box, extra_plot_kwargs = Any[:tight_layout => true])
 
-    my_layout = @layout [
-        a{0.6h}
-        b{0.4h}
-    ]
-    p5 = Plots.plot(p, p2; layout = my_layout, link = :x,
-                    size = (400, 400), right_margin = 5Plots.mm)
+    #my_layout = @layout [
+    #    a{0.6h}
+    #    b{0.4h}
+    #]
+    #p5 = Plots.plot(p, p2; layout = my_layout, link = :x,
+    #                size = (400, 400), right_margin = 5Plots.mm)
 
-    return p5
+    return p
 end
 
+violinplotdata = function(data, positions; xlim = (0,3000), ylim = (0,NUM_GENOTYPES+2))
+
+    width = (positions[2] - positions[1])*0.6
+    data = stack(data[1])
+
+    Ns_at_times = []
+    labels = []
+    for time in positions
+        t = trunc(Int, round(time))
+        push!(Ns_at_times, data[t,:])
+        push!(labels, fill(t, length(data[t,:])))
+    end
+
+    labels = reduce(vcat, labels)
+    Ns_at_times = reduce(vcat,Ns_at_times)
+
+    #return labels, Ns_at_times
+    p = StatsPlots.violin(labels, Ns_at_times, bar_width = width, xlim = xlim, ylim = ylim, bandwidth = 0.75, legend = false, color = :grey, ylabel = "Distribution of N")
+    return p
+end
+ 
+# ---- Combined figure: trajectories / dW/dt / violins, shared time axis ------
+Nvst_figure = function(data;
+                       positions,                  # x positions for the violins
+                       xlim          = (0, 5000),
+                       ylim          = (0, NUM_GENOTYPES+2),
+                       heights       = (0.5, 0.25, 0.25),
+                       plot_size     = (400, 400),
+                       title         = "",
+                       traj_kwargs   = (;),    # extra options for Nvst_hot_trajectories
+)
+ 
+    # Colorbar is off by default so all three panels' time axes line up exactly
+    p_traj = Nvst_hot_trajectories(data;
+                 xlim = xlim, ylim = ylim, colorbar = false, title = "",
+                 traj_kwargs...)
+    Plots.plot!(p_traj; xlabel = "")
+ 
+    p_dw = Plots.plot(data.time_axis, bin_mean(data.dtmeanvst, data.time_bin);
+                      linewidth = 3, legend = false, color = :black,
+                      ylim = (0, 1.0), xlim = xlim, ylabel = "Reproductive rate", xlabel = "Time")
+ 
+    p_violin = violinplotdata(data, positions; xlim = xlim, ylim = ylim)
+ 
+    fig = Plots.plot(p_traj, p_violin, p_dw;
+                     layout = Plots.grid(3, 1; heights = collect(heights)),
+                     yguidefontsize = 7,
+                     link = :x, size = plot_size,
+                     left_margin = 5Plots.mm, right_margin = 3Plots.mm, bottom_margin = -3Plots.mm)
+ 
+    return fig
+end
 # HDF5.jl renamed `attributes` to `attrs` in newer versions; support both.
 _attrs(x) = isdefined(HDF5, :attrs) ? HDF5.attrs(x) : HDF5.attributes(x)
 
@@ -1034,7 +1098,7 @@ makespecifichybrid = function(vect)
 
 end
 
-plotmanymutants_withTFs = function(KCmatrix, rs, phis, poissonl, nsamples; mutmag = mutmag)
+plotmanymutants_withTFs = function(KCmatrix, rs, phis, poissonl, nsamples; mutmag = mutmag, withmutationshown = "")
 
     allparams = vcat(reshape(rs, 1, length(phis)), KCmatrix)
     nonzeroparams = findall(!iszero, allparams)
@@ -1043,13 +1107,15 @@ plotmanymutants_withTFs = function(KCmatrix, rs, phis, poissonl, nsamples; mutma
 
     #first we just do a single mutation
     lambdas, sols = solvegrowthfunction_withTFs(50, KCmatrix,rs,phis)
-    m1lambdas, m1sols = solvegrowthfunction_withTFs(50, KCmatrix, rs/2.0, phis)
+    m1lambdas, m1sols = solvegrowthfunction_withTFs(50, KCmatrix, rs/1.75, phis)
 
-    p1 = Plots.plot(collect(1:50), sols[:,1], size = (400, 200), linewidth = 5, label = "before mutation", color = :blue, linestyle = :dot, ylabel = "T1 concentration", xlabel = "Number of cells (N)")
-    p1 = Plots.plot!(p1, collect(1:50), m1sols[:,1], linewidth = 3, linestyle = :solid, color = :red, label = "after mutation")
+    p1 = Plots.plot(collect(1:50), m1sols[:,1], linewidth = 5, linestyle = :solid, color = :red, label = "with mutation")
 
-    p2 = Plots.plot(collect(1:50), sols[:,2], size = (400, 200),ylabel = "T2 concentration", xlabel = "Number of cells (N)", linewidth = 5, label = "before mutation", color = :blue, linestyle = :dot)
-    p2 = Plots.plot!(p2, collect(1:50), m1sols[:,2], linewidth = 3, linestyle = :solid, color = :red, label = "after mutation")
+    p1 = Plots.plot!(p1, collect(1:50), sols[:,1], size = (400, 200), linewidth = 6, color = :blue, linestyle = :dot, ylabel = "T1 concentration", xlabel = "Number of cells (N)", legend = false)
+
+    p2 = Plots.plot(collect(1:50), m1sols[:,2], linewidth = 5, linestyle = :solid, color = :red, label = "with mutation")
+
+    p2 = Plots.plot!(p2, collect(1:50), sols[:,2], size = (400, 200),ylabel = "T2 concentration", xlabel = "Number of cells (N)", linewidth = 6, color = :blue, linestyle = :dot, legend = false)
 
     for i in 1:nsamples
         allparams = vcat(reshape(rs, 1, length(phis)), KCmatrix)
@@ -1068,30 +1134,35 @@ plotmanymutants_withTFs = function(KCmatrix, rs, phis, poissonl, nsamples; mutma
             higherorloweratroot[i] = mlambdas[12] > lambdas[12]
         end
         if i == 1
-            plot = Plots.plot(mlambdas, size = (400, 200), linewidth = 0.8, linestyle = :solid, color = :grey, label = "")
+            plot = Plots.plot(mlambdas, size = (400, 200), linewidth = 0.8, linestyle = :solid, color = :red, label = "")
         else
             #Plots.plot!(plot, collect(1:50) .+ (rand(50)*0.5 .* rand([-1,1])), mlambdas, linewidth = 1, linestyle = :solid, color = i+1, label = false)
             #Plots.plot!(plot, collect(1:50), mlambdas, linewidth = 0.8, linestyle = :solid, color = i+1, label = false)
-            Plots.plot!(plot, collect(1:50), mlambdas, linewidth = 0.8, linestyle = :solid, color = :grey, label = false)
+            Plots.plot!(plot, collect(1:50), mlambdas, linewidth = 0.8, linestyle = :solid, color = :red, label = false)
  
         end
 
     end
-    plot = Plots.plot!(plot, collect(1:50), m1lambdas, linewidth = 3, linestyle = :solid, color = :red, label = "")
- 
 
-    plot = Plots.plot!(plot, lambdas, ylim = (-0.0025,EPS+ 0.0025), xlabel = "Number of cells (N)", ylabel = "Cell replication rate (λ)", linewidth = 5, label = "", color = :blue, linestyle = :dot, legend = true)
+
+    plot = Plots.plot!(plot, collect(1:50), m1lambdas, linewidth = 5, linestyle = :solid, color = :red, label = "")
+ 
+    plot = Plots.plot!(plot, lambdas, ylim = (-0.0025,EPS+ 0.0025), xlabel = "Number of cells (N)", ylabel = "Cell replication rate (λ)", linewidth = 6, label = "", color = :blue, linestyle = :dot, legend = true)
+ 
+    
+
     #vline!([12])
-    #hline!([0.1])
 
-    plot = Plots.plot!(plot, [NaN], [NaN], linewidth = 5, label = "before mutation", color = :blue, linestyle = :dot, legend = true)
+    #hline!([0.1], color = :black, linestyle = :dot, label = "cell death rate")
+
+    plot = Plots.plot!(plot, [NaN], [NaN], linewidth = 6, label = "without mutation", color = :blue, linestyle = :dot, legend = :topright)
  
-    plot = Plots.plot!(plot,[NaN], [NaN], linewidth = 3, linestyle = :solid, color = :red, label = "after mutation")
+    plot = Plots.plot!(plot,[NaN], [NaN], linewidth = 5, linestyle = :solid, color = :red, label = withmutationshown)
  
-    plot = Plots.plot!([NaN], [NaN], size = (400, 200), linewidth = 0.8, linestyle = :solid, color = :grey, label = "other mutants")
+    plot = Plots.plot!([NaN], [NaN], size = (400, 200), linewidth = 0.8, linestyle = :solid, color = :red, label = "other possible mutants")
 
 
-    p5 = Plots.plot(p1,p2,plot, layout = (3,1), size = (400,600), left_margin = 12Plots.mm, link = :x)
+    p5 = Plots.plot(p1,p2,plot, layout = (3,1), size = (400,600), left_margin = 12Plots.mm, link = :x, legendfontsize = 7)
     #display(p5)
     print(mean(higherorloweratroot))
     return p5
@@ -1132,7 +1203,7 @@ solvegrowthfunction_withTFs = function(maxN, KCmatrix, rs, phis)
     return rhos, sols
 end
 
-plotmanymutants = function(KCmatrix, rs, phis, poissonl, nsamples; mutmag = mutmag, NUM_GENOTYPES = 50, size = (400,300))
+plotmanymutants = function(KCmatrix, rs, phis, poissonl, nsamples; mutmag = mutmag, NUM_GENOTYPES = 50, size = (400,300), legfontsize = 8)
     lambdas = solvegrowthfunction_withTFs(NUM_GENOTYPES, KCmatrix, rs, phis)[1]
 
     allparams = vcat(reshape(rs, 1, length(phis)), KCmatrix)
@@ -1157,21 +1228,22 @@ plotmanymutants = function(KCmatrix, rs, phis, poissonl, nsamples; mutmag = mutm
             higherorloweratroot[i] = mlambdas[12] > lambdas[12]
         end
         if i == 1
-            plot = Plots.plot(mlambdas, size = size, linewidth = 0.5, linestyle = :solid, color = :black, label = "")
+            plot = Plots.plot(mlambdas, size = size, linewidth = 0.5, linestyle = :solid, color = :red, label = "")
         else
             #Plots.plot!(plot, collect(1:NUM_GENOTYPES) .+ (rand(NUM_GENOTYPES)*0.5 .* rand([-1,1])), mlambdas, linewidth = 0.8, linestyle = :solid, color = i+1, label = false)
-            Plots.plot!(plot, collect(1:NUM_GENOTYPES) .+ (rand(NUM_GENOTYPES)*0.5 .* rand([-1,1])), mlambdas, linewidth = 0.5, linestyle = :solid, color = :black, label = false)
+            Plots.plot!(plot, collect(1:NUM_GENOTYPES) .+ (rand(NUM_GENOTYPES)*0.5 .* rand([-1,1])), mlambdas, linewidth = 0.8, linestyle = :solid, color = :red, label = false)
+            #Plots.plot!(plot, collect(1:NUM_GENOTYPES), mlambdas, linewidth = 0.8, linestyle = :solid, color = :red, label = false)
         end
 
     end
 
-    plot = Plots.plot!(lambdas, ylim = (-0.0025,EPS+ 0.0025), ylabelfontsize = 8, xlabel = "Number of cells (N)", ylabel = "Cell replication rate (λ)", linewidth = 5, label = "", color = :blue, linestyle = :dot, legend = true)
+    plot = Plots.plot!(lambdas, ylim = (-0.0025,EPS+ 0.0025), ylabelfontsize = 8, xlabel = "Number of cells (N)", ylabel = "Cell replication rate (λ)", linewidth = 6, label = "", color = :blue, linestyle = :dot, legend = true)
     #vline!([12])
     #hline!([0.1])
 
-    plot = Plots.plot!(plot, [NaN], [NaN], linewidth = 5, label = "before mutation", color = :blue, linestyle = :dot, legend = true)
+    plot = Plots.plot!(plot, [NaN], [NaN], linewidth = 5, label = "without mutation", color = :blue, linestyle = :dot, legend = true)
  
-    plot = Plots.plot!([NaN], [NaN], size = size, linewidth = 1.0, linestyle = :solid, color = :black, label = "sampled mutants")
+    plot = Plots.plot!([NaN], [NaN], size = size, linewidth = 1.0, linestyle = :solid, color = :red, label = "many sampled mutants", legendfontsize = legfontsize)
 
 
     #display(plot)

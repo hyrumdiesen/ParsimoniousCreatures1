@@ -7,7 +7,7 @@ plotselectedE = function(df, E, delta, ylimW)
 
     whichcolor = ["ff_avg_var1", "ff_avg_var2", "ssm_avg", "ssm_min"]
     #colors = [7, :lime, :red, :green, :blue]
-    colors = [:pink, :red, :green, :blue]
+    colors = [:orange, :red, :green, :blue]
 
     groupedEdelta = groupby(df, [:delta, :E])
     #for each plot
@@ -72,9 +72,10 @@ plotselectedE = function(df, E, delta, ylimW)
             leg = :none
         end
         
-        #Plots.plot!(p, xs, means, yerr = (uppers, lowers), size = (300,300), linewidth = 3, label = leg, color = color, markerstrokecolor=color, xlim = xlim, ylim = (0,ylimW), linestyle = style)
-        Plots.plot!(p, xs, means, yerr = (lowers, uppers), size = (300,300), linewidth = 3, label = :none, color = color, markerstrokecolor=color, xlim = xlim, ylim = (0,ylimW), linestyle = style, framestyle = :box, yrotation = 45)
-        #Plots.plot!(p, xs, means, yerr = (uppers, lowers), size = (300,300), linewidth = 3, label = leg, color = color, markerstrokecolor=color, xlim = xlim, linestyle = style)
+        #Plots.plot!(p, xs, means, yerr = (uppers, lowers), size = (300,300), linewidth = 5, label = leg, color = color, markerstrokecolor=color, xlim = xlim, ylim = (0,ylimW), linestyle = style)
+        Plots.plot!(p, xs, means, linewidth = 6, label = :none, color = color, linestyle = style, framestyle = :box, yrotation = 45, size = (300,300))
+        Plots.scatter!(p, xs, means, marker = :none, yerr = (lowers, uppers), size = (300,300), linewidth = 4, label = :none, color = color, markerstrokecolor=color, xlim = xlim, ylim = (0,ylimW), linestyle = :solid, framestyle = :box, yrotation = 45)
+        #Plots.plot!(p, xs, means, yerr = (uppers, lowers), size = (300,300), linewidth = 5, label = leg, color = color, markerstrokecolor=color, xlim = xlim, linestyle = style)
     end
 
     #Plots.hline!(p, [maxWs[i]], linewidth = 1, color = :black, linestyle = :dash, label = "max fitness")
@@ -91,10 +92,34 @@ plotcolumn = function(df, delta, ylimWs)
         push!(ps, p)
     end
 
-    fig = Plots.plot(ps[1], ps[2], ps[3], layout=(3, 1), size = (400,800) ,left_margin = 10Plots.mm, xguidefontsize = 9)
+    fig = Plots.plot(ps[1], ps[2], ps[3], layout=(3, 1), size = (400,800) ,left_margin = 10Plots.mm, xtickfontsize = 14, ytickfontsize = 14)
     fig
     return ps, fig
 end
+
+p_legend = Plots.plot([NaN], [NaN], label = "  Avg feedforward motif (var 1)", color = :orange, linestyle = :dot, linewidth = 7)
+Plots.plot!(p_legend, [NaN], [NaN], label = "  Avg feedforward motif (var 2)", color = :red, linestyle = :dot, linewidth = 7)
+Plots.plot!(p_legend,[NaN], [NaN], label = "  Avg simple step motif", color = :green, linewidth = 7)
+Plots.plot!(p_legend, [NaN], [NaN], label = "  Min simple step motif", color = :blue, linewidth = 7)
+
+
+# Create a dedicated "legend-only" plot
+p_legend = Plots.plot(p_legend, 
+    label = ["Sine" "Cosine"], 
+    color = [:red :blue],
+    seriestype = :line, 
+    framestyle = :none, 
+    axis = false, 
+    grid = false, 
+    showaxis = false, 
+    size = (500,150),
+    legend = :topleft,
+    legendfontsize = 12,
+)
+
+savefig(p_legend, "output_figures/plots/selectedE_legend.pdf")
+
+
 
 p_base = plotcolumn(df, "baseline", [80, 400, 11500])[2]
 savefig(p_base, "output_figures/plots/selectedE_baseline.pdf")
