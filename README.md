@@ -4,7 +4,7 @@ Within the parent research folder, there are two primary folders: `ode` and `ana
 
 The `ode` folder contains processed datasets, as well as scripts for plotting data, for running the deterministic model of Parsimonious Creatures, and for running general stochastic simulations of Parsimonious Creatures using `OrdinaryDiffEq` to solve GRN states of any network topology. Finally, a `playground.jl` file is included for getting familiar with running the simulations of Parsimonious Creatures using any GRN topology, as well as some of the GRNs described in the manuscript.
 
-The `research` directory contains specialized code for running highly optimized simulations of Parsimonious Creatures using analytic solutions of network topologies which are analytically solvable and thus are much faster to compute. All raw datasets may be reproduced here, but may take days or may require a cluster to complete. This environment is kept separate from `ode` due to dependency incompatibilities.
+The `analytic` directory contains specialized code for running highly optimized simulations of Parsimonious Creatures using analytic solutions of network topologies which are analytically solvable and thus are much faster to compute. All raw datasets may be reproduced here, but may take days or may require a cluster to complete. This environment is kept separate from `ode` due to dependency incompatibilities.
 
 To best reproduce data and figures, please follow the below steps:
 ## 1. Download the repository
