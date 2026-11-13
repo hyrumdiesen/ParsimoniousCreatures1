@@ -1,4 +1,6 @@
-Julia code and processed data to accompany manuscript titled "Parsimonious Creatures: Building Gene Regulatory Networks Robust to Somatic Evolution". All raw data is included, except ~3gb of raw heatmap datasets which can be found on Zenodo.
+Julia code and processed data to accompany manuscript titled "Parsimonious Creatures: Building Gene Regulatory Networks Robust to Somatic Evolution". This manuscript has can be found on bioarxiv: (https://www.biorxiv.org/content/10.64898/2026.11.07.764957v1)
+
+All raw data is included in this repository, except ~3gb of raw heatmap datasets which can be found on Zenodo: (https://zenodo.org/records/23656540).
 
 Within the parent research folder, there are two primary folders: `ode` and `analytic`. To maximize reproducibility, all code used in the paper can be run from one of two docker images which are fully separated into either of these folders.
 
