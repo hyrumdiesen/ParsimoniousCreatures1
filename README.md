@@ -9,17 +9,7 @@ The `research` directory contains specialized code for running highly optimized 
 To best reproduce data and figures, please follow the below steps:
 ## 1. Download the repository
 
-<<<<<<< HEAD
-Install git and docker if necessary, then use the command line to navigate to a directory where you wish to install the git repo:
-```
-cd ~/your/path
-```
-Download the entire git repository:
-```
-git clone https://github.com//hyrumdiesen/ParsimoniousCreatures1
-=======
 Open a terminal and navigate to the directory where you want to store the project. Clone the repository and enter the `research/` directory:
->>>>>>> ff45d7c (fixing paths)
 
 ```bash
 git clone https://github.com/hyrumdiesen/ParsimoniousCreatures1.git
@@ -50,10 +40,6 @@ The two images are independent. Build only the environment needed for your analy
 To generate all plots used to generate figures:
 
 ```
-<<<<<<< HEAD
-docker run -d --name my-simulation -e JULIA_NUM_THREADS=auto -v "${PWD}\data:/research/analytic/" analytic
-```
-=======
 docker run --rm -it ode bash /research/ode/run_all_figures.sh
 ```
 
